@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "hexlet-code"
+version = "0.1.0"
+description = ""
+authors = ["Aleх Bark <thrtth@yandex.ru>"]
+readme = "README.md"
+packages = [
+  { include = "app" },
+]
+classifiers = [
+  "Programming Language :: Python :: 3.11"
+]
+repository = "https://github.com/thrtth/python-project-83"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^3.0.3"
+gunicorn = "^22.0.0"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
