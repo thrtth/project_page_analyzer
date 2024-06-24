@@ -13,16 +13,9 @@ def normalize_url(url):
     return urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
 
 
-keepalive_kwargs = {
-  "keepalives": 1,
-  "keepalives_idle": 60,
-  "keepalives_interval": 10,
-  "keepalives_count": 5
-}
-
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL, **keepalive_kwargs)
+conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
