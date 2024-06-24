@@ -41,8 +41,9 @@ def add_url():
             flash('Страница уже существует', 'info')
             return redirect(url_for('get_url', url_id=url_exist[0]))
         else:
-            cur.execute('INSERT INTO urls (name, created_at) VALUES (%s, %s) RETURNING id;'
-                        , (normalized_url, datetime.now()))
+            cur.execute('INSERT INTO urls (name, created_at)'
+                        ' VALUES (%s, %s) RETURNING id;',
+                        (normalized_url, datetime.now()))
             url_id = cur.fetchone()[0]
             conn.commit()
             return redirect(url_for('get_url', url_id=url_id))
