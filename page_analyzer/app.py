@@ -58,23 +58,48 @@ def get_url(url_id):
         url_data_dict = {
             'id': entry[0],
             'name': entry[1],
-            'created_at': entry[2]
+            'created_at': entry[2],
         }
-    return render_template('url.html', url=url_data_dict, messages=messages)
+        cur.execute('SELECT url_checks.id, url_checks.created_at '
+                    'FROM url_checks JOIN urls '
+                    'ON urls.id = url_id '
+                    'WHERE urls.id = %s;', (url_id,))
+        checks = cur.fetchall()
+        check_list = []
+        for check in checks:
+            check_dict = {
+                'id': check[0],
+                'created_at': check[1]
+            }
+            check_list.append(check_dict)
+    return render_template('url.html', url=url_data_dict, checks=check_list, messages=messages)
 
 
 @app.route('/urls', methods=['GET'])
 def get_urls():
     with conn.cursor() as cur:
-        cur.execute('SELECT * FROM urls ORDER BY created_at DESC;')
+        cur.execute('SELECT urls.id, urls.name, '
+                    'MAX(url_checks.created_at) AS latest_check '
+                    'FROM urls LEFT JOIN url_checks '
+                    'ON urls.id = url_checks.url_id '
+                    'GROUP BY urls.id, urls.name '
+                    'ORDER BY urls.created_at DESC;')
         urls = cur.fetchall()
         url_list = []
         for url in urls:
             url_dict = {
                 'id': url[0],
                 'name': url[1],
-                'created_at': url[2]
+                'latest_check': url[2]
             }
             url_list.append(url_dict)
-
     return render_template('urls.html', urls=url_list)
+
+
+@app.route('/urls/<url_id>/checks', methods=['POST'])
+def url_checks(url_id):
+    with conn.cursor() as cur:
+        cur.execute('INSERT INTO url_checks (url_id, created_at)'
+                    ' VALUES (%s, %s);', (url_id, datetime.now()))
+        conn.commit()
+        return redirect(url_for('get_url', url_id=url_id))
