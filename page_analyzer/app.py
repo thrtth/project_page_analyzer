@@ -35,14 +35,15 @@ def add_url():
         return redirect(url_for('index'))
     normalized_url = normalize_url(url)
     with conn.cursor() as cur:
-        cur.execute('SELECT id FROM urls WHERE name = %s;', (normalized_url,))
+        cur.execute('SELECT id FROM urls WHERE name = %s;',
+                    (normalized_url,))
         url_exist = cur.fetchone()
         if url_exist:
             flash('Страница уже существует', 'info')
             return redirect(url_for('get_url', url_id=url_exist[0]))
         else:
-            cur.execute('INSERT INTO urls (name, created_at)'
-                        ' VALUES (%s, %s) RETURNING id;',
+            cur.execute('INSERT INTO urls (name, created_at) '
+                        'VALUES (%s, %s) RETURNING id;',
                         (normalized_url, datetime.now()))
             url_id = cur.fetchone()[0]
             conn.commit()
@@ -53,7 +54,8 @@ def add_url():
 def get_url(url_id):
     messages = get_flashed_messages(with_categories=True)
     with conn.cursor() as cur:
-        cur.execute('SELECT * FROM urls WHERE id = %s;', (url_id,))
+        cur.execute('SELECT * FROM urls WHERE id = %s;',
+                    (url_id,))
         entry = cur.fetchone()
         url_data_dict = {
             'id': entry[0],
@@ -63,7 +65,8 @@ def get_url(url_id):
         cur.execute('SELECT url_checks.id, url_checks.created_at '
                     'FROM url_checks JOIN urls '
                     'ON urls.id = url_id '
-                    'WHERE urls.id = %s;', (url_id,))
+                    'WHERE urls.id = %s;',
+                    (url_id,))
         checks = cur.fetchall()
         check_list = []
         for check in checks:
@@ -72,7 +75,10 @@ def get_url(url_id):
                 'created_at': check[1]
             }
             check_list.append(check_dict)
-    return render_template('url.html', url=url_data_dict, checks=check_list, messages=messages)
+    return render_template('url.html',
+                           url=url_data_dict,
+                           checks=check_list,
+                           messages=messages)
 
 
 @app.route('/urls', methods=['GET'])
@@ -99,7 +105,8 @@ def get_urls():
 @app.route('/urls/<url_id>/checks', methods=['POST'])
 def url_checks(url_id):
     with conn.cursor() as cur:
-        cur.execute('INSERT INTO url_checks (url_id, created_at)'
-                    ' VALUES (%s, %s);', (url_id, datetime.now()))
+        cur.execute('INSERT INTO url_checks (url_id, created_at) '
+                    'VALUES (%s, %s);',
+                    (url_id, datetime.now()))
         conn.commit()
         return redirect(url_for('get_url', url_id=url_id))
