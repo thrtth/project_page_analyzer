@@ -21,8 +21,16 @@
                     {{ url.name }}
                 </a>
             </td>
-            <td>{{ url.latest_check.strftime('%Y-%m-%d') }}</td>
-            <td></td>
+            {% if url.latest_check %}
+                <td>{{ url.latest_check.strftime('%Y-%m-%d') }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            {% if url.status %}
+                <td>{{ url.status }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
         </tr>
         {% endfor %}
         </tbody>
