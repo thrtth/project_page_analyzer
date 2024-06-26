@@ -46,15 +46,20 @@ def add_url():
         return redirect(url_for('index'))
     normalized_url = normalize_url(url)
     with conn.cursor() as cur:
-        cur.execute('SELECT id FROM urls WHERE name = %s;',
+        cur.execute('SELECT '
+                    'id '
+                    'FROM urls '
+                    'WHERE name = %s;',
                     (normalized_url,))
         url_exist = cur.fetchone()
         if url_exist:
             flash('Страница уже существует', 'info')
             return redirect(url_for('get_url', url_id=url_exist[0]))
         else:
-            cur.execute('INSERT INTO urls (name, created_at) '
-                        'VALUES (%s, %s) RETURNING id;',
+            cur.execute('INSERT INTO '
+                        'urls (name, created_at) '
+                        'VALUES (%s, %s) '
+                        'RETURNING id;',
                         (normalized_url, datetime.now()))
             url_id = cur.fetchone()[0]
             conn.commit()
@@ -65,7 +70,10 @@ def add_url():
 def get_url(url_id):
     messages = get_flashed_messages(with_categories=True)
     with conn.cursor() as cur:
-        cur.execute('SELECT * FROM urls WHERE id = %s;',
+        cur.execute('SELECT '
+                    '* '
+                    'FROM urls '
+                    'WHERE id = %s;',
                     (url_id,))
         entry = cur.fetchone()
         url_data_dict = {
@@ -77,7 +85,8 @@ def get_url(url_id):
                     'url_checks.id, '
                     'url_checks.status_code, '
                     'url_checks.created_at '
-                    'FROM url_checks JOIN urls '
+                    'FROM url_checks '
+                    'JOIN urls '
                     'ON urls.id = url_id '
                     'WHERE urls.id = %s;',
                     (url_id,))
@@ -111,7 +120,8 @@ def get_urls():
         urls = cur.fetchall()
         url_list = []
         for url in urls:
-            cur.execute('SELECT status_code '
+            cur.execute('SELECT '
+                        'status_code '
                         'FROM url_checks '
                         'WHERE url_id = %s AND created_at = %s',
                         (url[0], url[2]))
@@ -131,11 +141,15 @@ def get_urls():
 @app.route('/urls/<url_id>/checks', methods=['POST'])
 def url_checks(url_id):
     with conn.cursor() as cur:
-        cur.execute('SELECT name FROM urls WHERE id = %s', (url_id,))
+        cur.execute('SELECT '
+                    'name '
+                    'FROM urls '
+                    'WHERE id = %s', (url_id,))
         url_name = cur.fetchone()[0]
         status_code = get_status_code(url_name)
         if status_code is not None:
-            cur.execute('INSERT INTO url_checks (url_id, status_code, created_at) '
+            cur.execute('INSERT INTO '
+                        'url_checks (url_id, status_code, created_at) '
                         'VALUES (%s, %s, %s);',
                         (url_id, status_code, datetime.now()))
             conn.commit()
