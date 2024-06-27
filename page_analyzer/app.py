@@ -185,7 +185,13 @@ def url_checks(url_id):
             title = get_title(soup)
             meta = get_meta(soup)
             cur.execute('INSERT INTO '
-                        'url_checks (url_id, status_code, h1, title, description, created_at) '
+                        'url_checks '
+                        '(url_id, '
+                        'status_code, '
+                        'h1, '
+                        'title, '
+                        'description, '
+                        'created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s);',
                         (url_id, status_code, h1, title, meta, datetime.now()))
             conn.commit()
