@@ -7,6 +7,7 @@ import validators
 from urllib.parse import urlparse, urlunparse
 from datetime import datetime
 import requests
+from bs4 import BeautifulSoup
 
 
 def normalize_url(url):
@@ -14,14 +15,38 @@ def normalize_url(url):
     return urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
 
 
-def get_status_code(url):
+def get_response(url):
     try:
         response = requests.get(url)
         response.raise_for_status()
-        return response.status_code
+        return response
 
     except Exception:
         flash('Произошла ошибка при проверке', 'danger')
+
+
+def get_h1(html_page):
+    h1_tag = html_page.find('h1')
+    if h1_tag:
+        return h1_tag.text.strip()
+    else:
+        return ''
+
+
+def get_title(html_page):
+    title_tag = html_page.find('title')
+    if title_tag:
+        return title_tag.text.strip()
+    else:
+        return ''
+
+
+def get_meta(html_page):
+    meta_tag = html_page.find('meta', attrs={'name': 'description'})
+    if meta_tag:
+        return meta_tag.get('content').strip()
+    else:
+        return ''
 
 
 load_dotenv()
@@ -84,6 +109,9 @@ def get_url(url_id):
         cur.execute('SELECT '
                     'url_checks.id, '
                     'url_checks.status_code, '
+                    'url_checks.h1, '
+                    'url_checks.title, '
+                    'url_checks.description, '
                     'url_checks.created_at '
                     'FROM url_checks '
                     'JOIN urls '
@@ -96,7 +124,10 @@ def get_url(url_id):
             check_dict = {
                 'id': check[0],
                 'status_code': check[1],
-                'created_at': check[2]
+                'h1': check[2],
+                'title': check[3],
+                'meta': check[4],
+                'created_at': check[5]
             }
             check_list.append(check_dict)
     return render_template('url.html',
@@ -146,12 +177,16 @@ def url_checks(url_id):
                     'FROM urls '
                     'WHERE id = %s', (url_id,))
         url_name = cur.fetchone()[0]
-        status_code = get_status_code(url_name)
-        if status_code is not None:
+        response = get_response(url_name)
+        if response is not None:
+            status_code = response.status_code
+            soup = BeautifulSoup(response.text, 'html.parser')
+            h1 = get_h1(soup)
+            title = get_title(soup)
+            meta = get_meta(soup)
             cur.execute('INSERT INTO '
-                        'url_checks (url_id, status_code, created_at) '
-                        'VALUES (%s, %s, %s);',
-                        (url_id, status_code, datetime.now()))
+                        'url_checks (url_id, status_code, h1, title, description, created_at) '
+                        'VALUES (%s, %s, %s, %s, %s, %s);',
+                        (url_id, status_code, h1, title, meta, datetime.now()))
             conn.commit()
-
-        return redirect(url_for('get_url', url_id=url_id))
+    return redirect(url_for('get_url', url_id=url_id))
