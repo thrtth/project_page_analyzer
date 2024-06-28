@@ -62,8 +62,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 @app.route('/')
 def index():
-    messages = get_flashed_messages(with_categories=True)
-    return render_template('index.html', messages=messages)
+    return render_template('index.html')
 
 
 @app.route('/urls', methods=['POST'])
@@ -71,7 +70,8 @@ def add_url():
     url = request.form['url']
     if not validators.url(url):
         flash('Некорректный URL', 'danger')
-        return redirect(url_for('index'))
+        return render_template('index.html'), 422
+
     normalized_url = normalize_url(url)
     conn = get_db_conn()
     with conn.cursor() as cur:
