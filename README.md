@@ -9,7 +9,7 @@
 
 ### Requirements
 
-python ^3.11.0
+python ^3.10.0
 flask ^3.0.3
 gunicorn ^22.0.0
 python-dotenv ^1.0.1
