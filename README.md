@@ -9,14 +9,14 @@
 
 ### Requirements
 
-python ^3.10.0
-flask ^3.0.3
-gunicorn ^22.0.0
-python-dotenv ^1.0.1
-psycopg2-binary ^2.9.9
-validators ^0.28.3
-requests ^2.32.3
-beautifulsoup4 ^4.12.3
+python ^3.10.0  
+flask ^3.0.3  
+gunicorn ^22.0.0  
+python-dotenv ^1.0.1  
+psycopg2-binary ^2.9.9  
+validators ^0.28.3  
+requests ^2.32.3  
+beautifulsoup4 ^4.12.3  
 
 ### Render server:
 https://python-project-83-raqv.onrender.com

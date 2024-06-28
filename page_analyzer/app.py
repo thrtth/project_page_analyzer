@@ -198,3 +198,6 @@ def url_checks(url_id):
             conn.commit()
             flash('Страница успешно проверена', 'success')
     return redirect(url_for('get_url', url_id=url_id))
+
+
+conn.close()
