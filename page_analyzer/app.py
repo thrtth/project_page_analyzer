@@ -49,9 +49,12 @@ def get_meta(html_page):
         return ''
 
 
+def get_db_conn():
+    return psycopg2.connect(DATABASE_URL)
+
+
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -70,6 +73,7 @@ def add_url():
         flash('Некорректный URL', 'danger')
         return redirect(url_for('index'))
     normalized_url = normalize_url(url)
+    conn = get_db_conn()
     with conn.cursor() as cur:
         cur.execute('SELECT '
                     'id '
@@ -79,6 +83,7 @@ def add_url():
         url_exist = cur.fetchone()
         if url_exist:
             flash('Страница уже существует', 'info')
+            conn.close()
             return redirect(url_for('get_url', url_id=url_exist[0]))
         else:
             cur.execute('INSERT INTO '
@@ -88,6 +93,7 @@ def add_url():
                         (normalized_url, datetime.now()))
             url_id = cur.fetchone()[0]
             conn.commit()
+            conn.close()
             flash('Страница успешно добавлена', 'success')
             return redirect(url_for('get_url', url_id=url_id))
 
@@ -95,6 +101,7 @@ def add_url():
 @app.route('/urls/<url_id>')
 def get_url(url_id):
     messages = get_flashed_messages(with_categories=True)
+    conn = get_db_conn()
     with conn.cursor() as cur:
         cur.execute('SELECT '
                     '* '
@@ -131,6 +138,7 @@ def get_url(url_id):
                 'created_at': check[5]
             }
             check_list.append(check_dict)
+    conn.close()
     return render_template('url.html',
                            url=url_data_dict,
                            checks=check_list,
@@ -139,6 +147,7 @@ def get_url(url_id):
 
 @app.route('/urls', methods=['GET'])
 def get_urls():
+    conn = get_db_conn()
     with conn.cursor() as cur:
         cur.execute('SELECT '
                     'urls.id, '
@@ -167,11 +176,13 @@ def get_urls():
                 'status': status
             }
             url_list.append(url_dict)
+    conn.close()
     return render_template('urls.html', urls=url_list)
 
 
 @app.route('/urls/<url_id>/checks', methods=['POST'])
 def url_checks(url_id):
+    conn = get_db_conn()
     with conn.cursor() as cur:
         cur.execute('SELECT '
                     'name '
@@ -197,7 +208,5 @@ def url_checks(url_id):
                         (url_id, status_code, h1, title, meta, datetime.now()))
             conn.commit()
             flash('Страница успешно проверена', 'success')
+    conn.close()
     return redirect(url_for('get_url', url_id=url_id))
-
-
-conn.close()
