@@ -88,6 +88,7 @@ def add_url():
                         (normalized_url, datetime.now()))
             url_id = cur.fetchone()[0]
             conn.commit()
+            flash('Страница успешно добавлена', 'success')
             return redirect(url_for('get_url', url_id=url_id))
 
 
@@ -195,4 +196,5 @@ def url_checks(url_id):
                         'VALUES (%s, %s, %s, %s, %s, %s);',
                         (url_id, status_code, h1, title, meta, datetime.now()))
             conn.commit()
+            flash('Страница успешно проверена', 'success')
     return redirect(url_for('get_url', url_id=url_id))

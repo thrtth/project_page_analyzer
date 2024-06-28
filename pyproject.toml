@@ -1,14 +1,16 @@
 [tool.poetry]
 name = "hexlet-code"
 version = "0.1.0"
-description = ""
+description = "Page analyzer"
 authors = ["Aleх Bark <thrtth@yandex.ru>"]
 readme = "README.md"
 packages = [
   { include = "page_analyzer" },
 ]
 classifiers = [
-  "Programming Language :: Python :: 3.11"
+  "Programming Language :: Python :: 3.11",
+  "Environment :: Web Environment",
+  "Framework :: Flask"
 ]
 repository = "https://github.com/thrtth/python-project-83"
 
