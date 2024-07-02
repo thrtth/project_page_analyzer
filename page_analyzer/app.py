@@ -3,7 +3,6 @@ import psycopg2
 from dotenv import load_dotenv
 from flask import (Flask, render_template, request, flash,
                    redirect, url_for, get_flashed_messages)
-from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from page_analyzer.tools.url_tools import is_valid_url, normalize_url
