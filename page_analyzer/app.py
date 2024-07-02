@@ -3,16 +3,10 @@ import psycopg2
 from dotenv import load_dotenv
 from flask import (Flask, render_template, request, flash,
                    redirect, url_for, get_flashed_messages)
-import validators
-from urllib.parse import urlparse, urlunparse
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
-
-
-def normalize_url(url):
-    parsed_url = urlparse(url)
-    return urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
+from tools.url_tools import is_valid_url, normalize_url
 
 
 def get_response(url):
@@ -68,7 +62,7 @@ def index():
 @app.route('/urls', methods=['POST'])
 def add_url():
     url = request.form['url']
-    if not validators.url(url):
+    if not is_valid_url(url):
         flash('Некорректный URL', 'danger')
         return render_template('index.html'), 422
 
