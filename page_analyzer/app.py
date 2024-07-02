@@ -6,7 +6,9 @@ from flask import (Flask, render_template, request, flash,
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
-from tools.url_tools import is_valid_url, normalize_url
+from page_analyzer.tools.url_tools import is_valid_url, normalize_url
+from page_analyzer.db_queries import queries
+from page_analyzer.tools.page_tools import get_meta, get_title, get_h1
 
 
 def get_response(url):
@@ -17,30 +19,6 @@ def get_response(url):
 
     except Exception:
         flash('Произошла ошибка при проверке', 'danger')
-
-
-def get_h1(html_page):
-    h1_tag = html_page.find('h1')
-    if h1_tag:
-        return h1_tag.text.strip()
-    else:
-        return ''
-
-
-def get_title(html_page):
-    title_tag = html_page.find('title')
-    if title_tag:
-        return title_tag.text.strip()
-    else:
-        return ''
-
-
-def get_meta(html_page):
-    meta_tag = html_page.find('meta', attrs={'name': 'description'})
-    if meta_tag:
-        return meta_tag.get('content').strip()
-    else:
-        return ''
 
 
 def get_db_conn():
@@ -69,23 +47,13 @@ def add_url():
     normalized_url = normalize_url(url)
     conn = get_db_conn()
     with conn.cursor() as cur:
-        cur.execute('SELECT '
-                    'id '
-                    'FROM urls '
-                    'WHERE name = %s;',
-                    (normalized_url,))
-        url_exist = cur.fetchone()
+        url_exist = queries.select_id(cur, normalized_url)
         if url_exist:
             flash('Страница уже существует', 'info')
             conn.close()
             return redirect(url_for('get_url', url_id=url_exist[0]))
         else:
-            cur.execute('INSERT INTO '
-                        'urls (name, created_at) '
-                        'VALUES (%s, %s) '
-                        'RETURNING id;',
-                        (normalized_url, datetime.now()))
-            url_id = cur.fetchone()[0]
+            url_id = queries.insert_url(cur, normalized_url)
             conn.commit()
             conn.close()
             flash('Страница успешно добавлена', 'success')
@@ -97,30 +65,13 @@ def get_url(url_id):
     messages = get_flashed_messages(with_categories=True)
     conn = get_db_conn()
     with conn.cursor() as cur:
-        cur.execute('SELECT '
-                    '* '
-                    'FROM urls '
-                    'WHERE id = %s;',
-                    (url_id,))
-        entry = cur.fetchone()
+        entry = queries.select_url(cur, url_id)
         url_data_dict = {
             'id': entry[0],
             'name': entry[1],
             'created_at': entry[2],
         }
-        cur.execute('SELECT '
-                    'url_checks.id, '
-                    'url_checks.status_code, '
-                    'url_checks.h1, '
-                    'url_checks.title, '
-                    'url_checks.description, '
-                    'url_checks.created_at '
-                    'FROM url_checks '
-                    'JOIN urls '
-                    'ON urls.id = url_id '
-                    'WHERE urls.id = %s;',
-                    (url_id,))
-        checks = cur.fetchall()
+        checks = queries.select_checks(cur, url_id)
         check_list = []
         for check in checks:
             check_dict = {
@@ -143,24 +94,10 @@ def get_url(url_id):
 def get_urls():
     conn = get_db_conn()
     with conn.cursor() as cur:
-        cur.execute('SELECT '
-                    'urls.id, '
-                    'urls.name, '
-                    'MAX(url_checks.created_at) '
-                    'FROM urls LEFT JOIN url_checks '
-                    'ON urls.id = url_checks.url_id '
-                    'GROUP BY urls.id, urls.name '
-                    'ORDER BY urls.created_at DESC;')
-
-        urls = cur.fetchall()
+        urls = queries.select_last_checks(cur)
         url_list = []
         for url in urls:
-            cur.execute('SELECT '
-                        'status_code '
-                        'FROM url_checks '
-                        'WHERE url_id = %s AND created_at = %s',
-                        (url[0], url[2]))
-            status = cur.fetchone()
+            status = queries.select_status_code(cur, url)
             if status is not None:
                 status = status[0]
             url_dict = {
@@ -178,11 +115,7 @@ def get_urls():
 def url_checks(url_id):
     conn = get_db_conn()
     with conn.cursor() as cur:
-        cur.execute('SELECT '
-                    'name '
-                    'FROM urls '
-                    'WHERE id = %s', (url_id,))
-        url_name = cur.fetchone()[0]
+        url_name = queries.select_name(cur, url_id)
         response = get_response(url_name)
         if response is not None:
             status_code = response.status_code
@@ -190,16 +123,7 @@ def url_checks(url_id):
             h1 = get_h1(soup)
             title = get_title(soup)
             meta = get_meta(soup)
-            cur.execute('INSERT INTO '
-                        'url_checks '
-                        '(url_id, '
-                        'status_code, '
-                        'h1, '
-                        'title, '
-                        'description, '
-                        'created_at) '
-                        'VALUES (%s, %s, %s, %s, %s, %s);',
-                        (url_id, status_code, h1, title, meta, datetime.now()))
+            queries.insert_check(cur, url_id, status_code, h1, title, meta)
             conn.commit()
             flash('Страница успешно проверена', 'success')
     conn.close()
