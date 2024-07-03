@@ -23,6 +23,7 @@ psycopg2-binary = "^2.9.9"
 validators = "^0.28.3"
 requests = "^2.32.3"
 beautifulsoup4 = "^4.12.3"
+sqlalchemy = "^2.0.31"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.0"
