@@ -24,9 +24,8 @@ def get_response(url):
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-DATABASE_URL_SA = os.getenv('DATABASE_URL_SA')
 
-engine = create_engine(DATABASE_URL_SA)
+engine = create_engine(DATABASE_URL)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
