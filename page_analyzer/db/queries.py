@@ -9,7 +9,8 @@ def select_id(session, url):
 
 
 def insert_url(session, url):
-    req = insert(Urls).values(name=url, created_at=datetime.now()).returning(Urls.id)
+    req = (insert(Urls).values(name=url, created_at=datetime.now())
+           .returning(Urls.id))
     url_id = session.execute(req).scalar()
     session.commit()
     return url_id
