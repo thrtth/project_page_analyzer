@@ -23,35 +23,35 @@ def upgrade() -> None:
     op.drop_table('bb')
     op.drop_table('aa')
     op.alter_column('url_checks', 'id',
-               existing_type=sa.BIGINT(),
-               server_default=None,
-               type_=sa.Integer(),
-               existing_nullable=False,
-               autoincrement=True)
+                    existing_type=sa.BIGINT(),
+                    server_default=None,
+                    type_=sa.Integer(),
+                    existing_nullable=False,
+                    autoincrement=True)
     op.alter_column('url_checks', 'url_id',
-               existing_type=sa.BIGINT(),
-               type_=sa.Integer(),
-               nullable=True)
+                    existing_type=sa.BIGINT(),
+                    type_=sa.Integer(),
+                    nullable=True)
     op.alter_column('url_checks', 'created_at',
-               existing_type=postgresql.TIMESTAMP(),
-               nullable=True)
+                    existing_type=postgresql.TIMESTAMP(),
+                    nullable=True)
     op.create_foreign_key(None,
                           'url_checks',
                           'urls',
                           ['url_id'],
                           ['id'])
     op.alter_column('urls', 'id',
-               existing_type=sa.BIGINT(),
-               server_default=None,
-               type_=sa.Integer(),
-               existing_nullable=False,
-               autoincrement=True)
+                    existing_type=sa.BIGINT(),
+                    server_default=None,
+                    type_=sa.Integer(),
+                    existing_nullable=False,
+                    autoincrement=True)
     op.alter_column('urls', 'name',
-               existing_type=sa.VARCHAR(length=255),
-               nullable=True)
+                    existing_type=sa.VARCHAR(length=255),
+                    nullable=True)
     op.alter_column('urls', 'created_at',
-               existing_type=postgresql.TIMESTAMP(),
-               nullable=True)
+                    existing_type=postgresql.TIMESTAMP(),
+                    nullable=True)
     op.drop_constraint('urls_name_key',
                        'urls', type_='unique')
     # ### end Alembic commands ###
@@ -62,66 +62,66 @@ def downgrade() -> None:
     op.create_unique_constraint('urls_name_key',
                                 'urls', ['name'])
     op.alter_column('urls', 'created_at',
-               existing_type=postgresql.TIMESTAMP(),
-               nullable=False)
+                    existing_type=postgresql.TIMESTAMP(),
+                    nullable=False)
     op.alter_column('urls', 'name',
-               existing_type=sa.VARCHAR(length=255),
-               nullable=False)
+                    existing_type=sa.VARCHAR(length=255),
+                    nullable=False)
     op.alter_column('urls', 'id',
-               existing_type=sa.Integer(),
-               server_default=sa.Identity(always=True,
-                                          start=1,
-                                          increment=1,
-                                          minvalue=1,
-                                          maxvalue=9223372036854775807,
-                                          cycle=False,
-                                          cache=1),
-               type_=sa.BIGINT(),
-               existing_nullable=False,
-               autoincrement=True)
+                    existing_type=sa.Integer(),
+                    server_default=sa.Identity(always=True,
+                                               start=1,
+                                               increment=1,
+                                               minvalue=1,
+                                               maxvalue=9223372036854775807,
+                                               cycle=False,
+                                               cache=1),
+                    type_=sa.BIGINT(),
+                    existing_nullable=False,
+                    autoincrement=True)
     op.drop_constraint(None,
                        'url_checks',
                        type_='foreignkey')
     op.alter_column('url_checks',
                     'created_at',
-               existing_type=postgresql.TIMESTAMP(),
-               nullable=False)
+                    existing_type=postgresql.TIMESTAMP(),
+                    nullable=False)
     op.alter_column('url_checks', 'url_id',
-               existing_type=sa.Integer(),
-               type_=sa.BIGINT(),
-               nullable=False)
+                    existing_type=sa.Integer(),
+                    type_=sa.BIGINT(),
+                    nullable=False)
     op.alter_column('url_checks', 'id',
-               existing_type=sa.Integer(),
-               server_default=sa.Identity(always=True,
-                                          start=1,
-                                          increment=1,
-                                          minvalue=1,
-                                          maxvalue=9223372036854775807,
-                                          cycle=False,
-                                          cache=1),
-               type_=sa.BIGINT(),
-               existing_nullable=False,
-               autoincrement=True)
+                    existing_type=sa.Integer(),
+                    server_default=sa.Identity(always=True,
+                                               start=1,
+                                               increment=1,
+                                               minvalue=1,
+                                               maxvalue=9223372036854775807,
+                                               cycle=False,
+                                               cache=1),
+                    type_=sa.BIGINT(),
+                    existing_nullable=False,
+                    autoincrement=True)
     op.create_table('aa',
-    sa.Column('id', sa.INTEGER(),
-              autoincrement=False,
-              nullable=True),
-    sa.Column('name', sa.VARCHAR(length=25),
-              autoincrement=False,
-              nullable=True)
-    )
+                    sa.Column('id', sa.INTEGER(),
+                              autoincrement=False,
+                              nullable=True),
+                    sa.Column('name', sa.VARCHAR(length=25),
+                              autoincrement=False,
+                              nullable=True)
+                    )
     op.create_table('bb',
-    sa.Column('id', sa.INTEGER(),
-              autoincrement=False,
-              nullable=True),
-    sa.Column('name_id', sa.INTEGER(),
-              autoincrement=False,
-              nullable=True),
-    sa.Column('da', sa.INTEGER(),
-              autoincrement=False,
-              nullable=True),
-    sa.Column('nn', sa.INTEGER(),
-              autoincrement=False,
-              nullable=True)
-    )
+                    sa.Column('id', sa.INTEGER(),
+                              autoincrement=False,
+                              nullable=True),
+                    sa.Column('name_id', sa.INTEGER(),
+                              autoincrement=False,
+                              nullable=True),
+                    sa.Column('da', sa.INTEGER(),
+                              autoincrement=False,
+                              nullable=True),
+                    sa.Column('nn', sa.INTEGER(),
+                              autoincrement=False,
+                              nullable=True)
+                    )
     # ### end Alembic commands ###
