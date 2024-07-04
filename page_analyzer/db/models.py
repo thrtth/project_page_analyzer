@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, MetaData
 from sqlalchemy.orm import relationship, DeclarativeBase
 
 
 class Base(DeclarativeBase):
-    pass
+    metadata = MetaData()
 
 
 class Urls(Base):
