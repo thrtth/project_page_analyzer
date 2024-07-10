@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
 from page_analyzer.tools.url_tools import is_valid_url, normalize_url
-from page_analyzer.db import queries
+from page_analyzer.models import queries
 from page_analyzer.tools.page_tools import get_meta, get_title, get_h1
 
 

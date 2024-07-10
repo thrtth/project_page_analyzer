@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import select, insert, func
-from page_analyzer.db.models import Urls, UrlChecks
+from page_analyzer.models.models import Urls, UrlChecks
 
 
 def select_id(session, url):
