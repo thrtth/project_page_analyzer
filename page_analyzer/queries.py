@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import select, insert, func
+from sqlalchemy import select, insert, func, null, or_
 
 from page_analyzer.models.models import Urls, UrlChecks
 
@@ -39,16 +39,9 @@ def select_last_checks(session):
                   subq.c.name,
                   subq.c.latest_check,
                   UrlChecks.status_code)
-           .join(UrlChecks, subq.c.id == UrlChecks.url_id)
-           .where(subq.c.latest_check == UrlChecks.created_at))
+           .join(UrlChecks, subq.c.id == UrlChecks.url_id, isouter=True)
+           .where(or_(subq.c.latest_check == UrlChecks.created_at, subq.c.latest_check == null())))
     return session.execute(req)
-
-
-def select_status_code(session, check):
-    req = (select(UrlChecks.status_code)
-           .where(UrlChecks.url_id == check.id)
-           .where(UrlChecks.created_at == check.latest_check))
-    return session.scalar(req)
 
 
 def select_name(session, url_id):
