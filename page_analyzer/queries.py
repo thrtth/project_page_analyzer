@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlalchemy import select, insert, func
+
 from page_analyzer.models.models import Urls, UrlChecks
 
 
@@ -12,7 +13,6 @@ def insert_url(session, url):
     req = (insert(Urls).values(name=url, created_at=datetime.now())
            .returning(Urls.id))
     url_id = session.execute(req).scalar()
-    session.commit()
     return url_id
 
 
@@ -27,12 +27,20 @@ def select_checks(session, url_id):
 
 
 def select_last_checks(session):
-    req = (select(Urls.id,
-                  Urls.name,
-                  func.max(UrlChecks.created_at).label('latest_check'))
-           .join(UrlChecks, isouter=True)
-           .group_by(Urls.id, Urls.name)
-           .order_by(Urls.created_at.desc()))
+    subq = (select(Urls.id,
+                   Urls.name,
+                   func.max(UrlChecks.created_at)
+                   .label('latest_check'))
+            .join(UrlChecks, isouter=True)
+            .group_by(Urls.id, Urls.name)
+            .order_by(Urls.created_at.desc())).cte('lc')
+
+    req = (select(subq.c.id,
+                  subq.c.name,
+                  subq.c.latest_check,
+                  UrlChecks.status_code)
+           .join(UrlChecks, subq.c.id == UrlChecks.url_id)
+           .where(subq.c.latest_check == UrlChecks.created_at))
     return session.execute(req)
 
 
@@ -57,4 +65,3 @@ def insert_check(session, url_id, status_code, h1, title, meta):
                    description=meta,
                    created_at=datetime.now()))
     session.execute(req)
-    session.commit()
