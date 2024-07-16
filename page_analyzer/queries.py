@@ -40,7 +40,8 @@ def select_last_checks(session):
                   subq.c.latest_check,
                   UrlChecks.status_code)
            .join(UrlChecks, subq.c.id == UrlChecks.url_id, isouter=True)
-           .where(or_(subq.c.latest_check == UrlChecks.created_at, subq.c.latest_check == null())))
+           .where(or_(subq.c.latest_check == UrlChecks.created_at,
+                      subq.c.latest_check == null())))
     return session.execute(req)
 
 
